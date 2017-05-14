@@ -21,50 +21,40 @@
 #include "controller.h"
 
 /* Game state */
-float elapsed_time; 
-int   score;
-int   lives;
-struct ship player;
+int   score;//thow long the game has been going on
+int   lives;// howq many lives the ship has
+bool started=false;//if the game has started or not
 
-float Dt = 0.01f;
+float Dt = 0.01f;//TIME FOR PHYSICS
 
-Ticker model, view, controller;
+Ticker model, view, controller;//the model,view and controller ticker
 
-bool paused = true;
-/* The single user button needs to have the PullUp resistor enabled */
-DigitalIn userbutton(P2_10,PullUp);
+
+/* this is where yo0u 
+intialise the start of the game and make it all smooth*/
 int main()
 {
-
-    init_DBuffer();
-    
-
-    view.attach( draw, 0.025);
+    initialise_heap();//intialises the linked list
+    init_DBuffer();// intialises the double buffering to make it smooth
+	   view.attach( draw, 0.025);//view gets constantly called to make sure it looks ok
+	 controller.attach( controls, 0.1);//controller gets constantly viewed every second to make sure you haven't pressed a button
+	
+	/*if started== true then
+	you will call for model to start t=doing all the action and makes lives = to 5*/
+    if(started==true){
     model.attach( physics, Dt);
-    controller.attach( controls, 0.1);
     
-    lives = 5;
-    
-    /* Pause to start */
-    while( userbutton.read() ){ /* remember 1 is not pressed */
-        paused=true;
-        wait_ms(100);
-    }
-    paused = false;
-    
-    while(true) {
-        /* do one of */
-        /* Wait until all lives have been used
-        while(lives>0){
-            // possibly do something game related here
-            wait_ms(200);
-        }
-        */
-        /* Wait until each life is lost
-        while( inPlay ){
-            // possibly do something game related here
-            wait_ms(200);
-        }
-        */
-    }
+    lives = 100;
+		}
+		
+		/*if lives is less than or equal to 0 then the model gets detaached so it doesn't interfere 
+		with anyother pages*/
+	
+	if(lives<=0){
+		model.detach();
+		//if joystick centre is pressed the model start again
+	if(joystickcentre()==true){
+		 model.attach( physics, Dt);
+	}
 }
+	}
